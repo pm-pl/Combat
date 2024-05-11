@@ -1,0 +1,21 @@
+# Cooldown time (in ticks) for combat timer.  Recommended: 600
+cooldown: 600
+
+# Kill the player if they tries to log off in combat. Recommended: true
+quit-kill: true
+
+# List of commands to block when players are in combat. You can also put subcommands.
+# The plugin will automatically block all aliases of commands listed here, except for subcommand aliases.
+commands:
+  - spawn
+  - home
+  - warp
+  - tpa
+  - f home
+
+messages:
+  combat-start: "&eYou are now in combat for &b30&r&e seconds."
+
+  combat-stop: "&aYou are no longer in combat."
+
+  banned-command: "&cYou cannot use that command while in combat!"

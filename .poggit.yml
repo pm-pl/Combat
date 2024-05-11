@@ -1,0 +1,8 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/ItsMax123/Combat
+branches:
+  - master
+projects:
+  Combat:
+    path: ""
+    icon: "Combat.png"
+...
