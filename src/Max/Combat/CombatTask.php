@@ -10,9 +10,11 @@ use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
 
 class CombatTask extends Task {
+    private Player $player;
     private Session $session;
 
-    public function __construct(private readonly Player $player) {
+    public function __construct(Player $player) {
+        $this->player = $player;
         $this->session = Combat::getInstance()->getSession($this->player);
     }
 
