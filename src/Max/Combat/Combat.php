@@ -21,6 +21,7 @@ class Combat extends PluginBase {
 
     public function onEnable(): void {
         $this->saveDefaultConfig();
+        // In order to make sure all commands have been loaded, run 1 tick after enable
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function(): void {
             $this->getConfig()->set("commands", array_map(function($commands) {
                 $args = explode(" ", $commands);
@@ -51,6 +52,10 @@ class Combat extends PluginBase {
 
     public function getCooldown(): int {
         return $this->getConfig()->get("cooldown", 600);
+    }
+
+    public function getQuitKill(): bool {
+        return $this->getConfig()->get("quit-kill", true);
     }
 
     /** @return String[] */

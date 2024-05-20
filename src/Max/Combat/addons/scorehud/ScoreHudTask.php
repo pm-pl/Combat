@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Max\Combat\addons\scorehud;
 
 use Ifera\ScoreHud\event\PlayerTagUpdateEvent;
@@ -19,10 +21,10 @@ class ScoreHudTask extends Task {
     }
 
     public function onRun(): void {
-        if ($this->player->isConnected() && $this->session->isInCombat()) {
-            (new PlayerTagUpdateEvent($this->player, new ScoreTag("combat.cooldown", (string)(int)($this->session->getCombatCooldownExpiry()/20))))->call();
-        } else {
-            $this->getHandler()->cancel();
+        if ($this->player->isConnected()) {
+            (new PlayerTagUpdateEvent($this->player, new ScoreTag("combat.cooldown", (string)max(0, ceil($this->session->getCombatCooldownExpiry()/20)))))->call();
+            if ($this->session->isInCombat()) return;
         }
+        $this->getHandler()->cancel();
     }
 }

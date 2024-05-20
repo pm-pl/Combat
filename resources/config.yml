@@ -1,24 +1,35 @@
-# Cooldown time (in ticks) for combat timer.  Recommended: 600
+# Cooldown time (in ticks) for combat timer. Recommended: 600
 cooldown: 600
 
 # Kill the player if they try to log off in combat. Recommended: true
 quit-kill: true
 
-# List of commands to block when players are in combat. You can also put subcommands.
-# The plugin will automatically block all aliases of commands listed here, except for subcommand aliases.
+# List of commands to block when players are in combat.
+#
+# The plugin will automatically block all aliases of blocked commands.
+# For example, putting `tp` will automatically block all sub-commands like: `teleport`.
+#
+# The plugin will automatically block all sub-commands of blocked commands.
+# For example, putting `f` will automatically block all sub-commands like: `f home`, `f info`, `f join`, etc.
+#
+# If you don't want to block all of a command's sub-commands, you can block specific sub-commands.
+# For example, putting `f home` will only block that sub-command and will not block: `f`, `f info`, `f join`, etc.
+#
+# Sub-command aliases will NOT be blocked, you must specify all sub-command aliases you want to block.
+# For example, putting `f unsethome` will not block `f delhome`, put must put both if you want to block them.
 commands:
-  - hub
+  - tp
   - spawn
+  - hub
   - warp
-  - home
-  - f home
   - wild
   - tpa
-  - tp
+  - home
+  - f home
 
 messages:
   combat-start: "&eYou are now in combat for &b30&r&e seconds."
 
   combat-stop: "&aYou are no longer in combat."
 
-  banned-command: "&cYou cannot use that command while in combat!"
+  cancel-command-banned: "&cYou cannot use that command while in combat!"

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Max\Combat;
 
-use Max\Combat\events\CombatStopEvent;
+use Max\Combat\events\CombatCooldownStopEvent;
 use pocketmine\player\Player;
 use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
@@ -21,7 +21,7 @@ class CombatTask extends Task {
     public function onRun(): void {
         if ($this->player->isConnected()) {
             if ($this->session->isInCombat()) return;
-            (new CombatStopEvent($this->player))->call();
+            (new CombatCooldownStopEvent($this->player))->call();
             $this->player->sendMessage(TextFormat::colorize(Combat::getInstance()->getConfig()->getNested("messages.combat-stop", "combat-stop")));
         }
         $this->getHandler()->cancel();
