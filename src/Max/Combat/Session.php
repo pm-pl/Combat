@@ -25,7 +25,7 @@ class Session {
         return $this->endCombatCooldown > Server::getInstance()->getTick();
     }
 
-    public function getCombatCooldownExpiry(): int {
+    public function getCombatCooldownLeft(): int {
         return $this->endCombatCooldown - Server::getInstance()->getTick();
     }
 }

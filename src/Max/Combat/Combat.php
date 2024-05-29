@@ -8,31 +8,55 @@ use Max\Combat\addons\scorehud\ScoreHudListener;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
+use pocketmine\utils\Config;
+use pocketmine\utils\TextFormat;
+use WeakMap;
 
 class Combat extends PluginBase {
     private static Combat $instance;
 
-    /** @var Session[] */
-    private array $sessions = [];
+    private Config $config;
+
+    /**
+     * @var WeakMap<Player, Session>
+     */
+    private WeakMap $sessions;
+
+    private int $cooldown;
+    private bool $quitKill;
+
+    /** @var string[]  */
+    private array $bannedCommands;
 
     public function onLoad(): void {
         self::$instance = $this;
     }
 
     public function onEnable(): void {
+        $this->sessions = new WeakMap();
+
         $this->saveDefaultConfig();
-        // In order to make sure all commands have been loaded, run 1 tick after enable
+        $this->config = $this->getConfig();
+        $this->cooldown = is_int($cooldown = $this->config->get("cooldown", 600)) ? $cooldown : 600;
+        $this->quitKill = is_bool($quitKill = $this->config->get("quit-kill", true)) ? $quitKill : true;
+        $this->bannedCommands = is_array($commands = $this->config->get("commands", [])) ?
+            array_filter($commands, function($command): bool {
+                return is_string($command);
+            }) : [];
+
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function(): void {
-            $this->getConfig()->set("commands", array_map(function($commands) {
-                $args = explode(" ", $commands);
-                $realCommand = $this->getServer()->getCommandMap()->getCommand(strtolower($args[0]));
+            $this->bannedCommands = array_map(function($commands) {
+                $args = explode(" ", strtolower($commands));
+                $realCommand = $this->getServer()->getCommandMap()->getCommand($args[0]);
                 if ($realCommand !== null) {
-                    $args[0] = $realCommand->getName();
+                    $args[0] = strtolower($realCommand->getName());
                 }
-                return strtolower(implode(" ", $args));
-            }, $this->getConfig()->get("commands", [])));
+                return implode(" ", $args);
+            }, $this->bannedCommands);
         }), 1);
+
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
+
         if ($this->getServer()->getPluginManager()->getPlugin("ScoreHud") !== null) {
             $this->getServer()->getPluginManager()->registerEvents(new ScoreHudListener(), $this);
         }
@@ -43,23 +67,23 @@ class Combat extends PluginBase {
     }
 
     public function getSession(Player $player): Session {
-        return $this->sessions[$player->getUniqueId()->getBytes()] ??= new Session();
+        return $this->sessions[$player] ??= new Session();
     }
 
-    public function removeSession(Player $player): void {
-        unset($this->sessions[$player->getUniqueId()->getBytes()]);
+    public function getMessage(string $message): string {
+        return TextFormat::colorize($this->config->getNested("messages." . $message, $message));
     }
 
     public function getCooldown(): int {
-        return $this->getConfig()->get("cooldown", 600);
+        return $this->cooldown;
     }
 
     public function getQuitKill(): bool {
-        return $this->getConfig()->get("quit-kill", true);
+        return $this->quitKill;
     }
 
-    /** @return String[] */
+    /** @return string[] */
     public function getBannedCommands(): array {
-        return $this->getConfig()->get("commands", []);
+        return $this->bannedCommands;
     }
 }

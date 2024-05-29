@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Max\Combat;
 
+use Max\Combat\events\CombatCooldownRestartEvent;
 use Max\Combat\events\CombatCooldownStartEvent;
 use Max\Combat\events\CombatCooldownStopEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -12,7 +13,6 @@ use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\player\Player;
-use pocketmine\utils\TextFormat;
 
 final class EventListener implements Listener {
     private Combat $plugin;
@@ -31,14 +31,18 @@ final class EventListener implements Listener {
         foreach([$victim, $attacker] as $player) {
             if ($player->isCreative()) break;
             $session = $this->plugin->getSession($player);
-            $combatStartEvent = new CombatCooldownStartEvent($player, !$session->isInCombat(), $this->plugin->getCooldown());
-            $combatStartEvent->call();
-            if ($combatStartEvent->isCancelled()) break;
-            if ($combatStartEvent->isStart()) {
+            if ($session->isInCombat()) {
+                $combatEvent = new CombatCooldownRestartEvent($player, $this->plugin->getCooldown());
+                $combatEvent->call();
+                if ($combatEvent->isCancelled()) break;
+            } else {
+                $combatEvent = new CombatCooldownStartEvent($player, $this->plugin->getCooldown());
+                $combatEvent->call();
+                if ($combatEvent->isCancelled()) break;
                 $this->plugin->getScheduler()->scheduleRepeatingTask(new CombatTask($player), 1);
-                $player->sendMessage(TextFormat::colorize($this->plugin->getConfig()->getNested("messages.combat-start", "combat-start")));
+                $player->sendMessage($this->plugin->getMessage("combat-start"));
             }
-            $session->startCombatCooldown($combatStartEvent->getCooldown());
+            $session->startCombatCooldown($combatEvent->getCooldown());
         }
     }
 
@@ -48,16 +52,16 @@ final class EventListener implements Listener {
     public function onCommand(CommandEvent $event): void {
         $player = $event->getSender();
         if (!$player instanceof Player || !$this->plugin->getSession($player)->isInCombat()) return;
-        $args = explode(" ", preg_replace(['/"/', "/:/"], "", trim($event->getCommand())));
-        $realCommand = $this->plugin->getServer()->getCommandMap()->getCommand(strtolower($args[0]));
+        $args = explode(" ", strtolower(preg_replace(['/"/', '/:/'], "", trim($event->getCommand()))));
+        $realCommand = $this->plugin->getServer()->getCommandMap()->getCommand($args[0]);
         if ($realCommand !== null) {
-            $args[0] = $realCommand->getName();
+            $args[0] = strtolower($realCommand->getName());
         }
-        $command = strtolower(implode(" ", $args));
+        $command = implode(" ", $args);
         foreach ($this->plugin->getBannedCommands() as $bannedCommand) {
-            if (str_starts_with($command, strtolower($bannedCommand))) {
+            if (str_starts_with($command, $bannedCommand)) {
                 $event->cancel();
-                $player->sendMessage(TextFormat::colorize($this->plugin->getConfig()->getNested("messages.banned-command", "banned-command")));
+                $player->sendMessage($this->plugin->getMessage("banned-command"));
                 return;
             }
         }
@@ -72,6 +76,5 @@ final class EventListener implements Listener {
     public function onQuit(PlayerQuitEvent $event): void {
         $player = $event->getPlayer();
         if ($this->plugin->getQuitKill() && $this->plugin->getSession($player)->isInCombat()) $player->kill();
-        $this->plugin->removeSession($player);
     }
 }

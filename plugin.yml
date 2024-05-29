@@ -2,8 +2,7 @@ name: Combat
 main: Max\Combat\Combat
 version: 1.0.0
 api: 5.0.0
-softdepend:
-  - ScoreHud
+softdepend: [ScoreHud]
 
 author: ItsMax123
 website: "https://github.com/ItsMax123/Combat"

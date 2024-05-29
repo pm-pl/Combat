@@ -8,7 +8,7 @@ use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
 use pocketmine\player\Player;
 
-class CombatCooldownStartEvent extends PlayerCooldownEvent implements Cancellable {
+class CombatCooldownRestartEvent extends PlayerCooldownEvent implements Cancellable {
     use CancellableTrait;
 
     public function __construct(Player $player, int $cooldown) {
