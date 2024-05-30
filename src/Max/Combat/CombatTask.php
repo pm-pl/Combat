@@ -21,14 +21,13 @@ class CombatTask extends Task {
     public function onRun(): void {
         if ($this->player->isConnected()) {
             if ($this->session->isInCombat()) {
-                $cooldown = $this->session->getCombatCooldownLeft();
-                if ($cooldown % 20 === 0) {
-                    (new CombatCooldownUpdateEvent($this->player, $cooldown))->call();
+                if ($this->session->getCombatCooldownTimeLeft() % 20 === 0) {
+                    (new CombatCooldownUpdateEvent($this->player, $this->session->getCombatCooldownTimeLeft()))->call();
                 }
                 return;
             }
             (new CombatCooldownStopEvent($this->player))->call();
-            $this->player->sendMessage(Combat::getInstance()->getMessage("combat-stop"));
+            $this->player->sendMessage(Combat::getInstance()->getMessage("cooldown-stop"));
         }
         $this->getHandler()->cancel();
     }

@@ -40,7 +40,7 @@ final class EventListener implements Listener {
                 $combatEvent->call();
                 if ($combatEvent->isCancelled()) break;
                 $this->plugin->getScheduler()->scheduleRepeatingTask(new CombatTask($player), 1);
-                $player->sendMessage($this->plugin->getMessage("combat-start"));
+                $player->sendMessage($this->plugin->getMessage("cooldown-start"));
             }
             $session->startCombatCooldown($combatEvent->getCooldown());
         }
@@ -61,7 +61,7 @@ final class EventListener implements Listener {
         foreach ($this->plugin->getBannedCommands() as $bannedCommand) {
             if (str_starts_with($command, $bannedCommand)) {
                 $event->cancel();
-                $player->sendMessage($this->plugin->getMessage("banned-command"));
+                $player->sendMessage($this->plugin->getMessage("cancel-command-banned"));
                 return;
             }
         }

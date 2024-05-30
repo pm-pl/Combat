@@ -1,0 +1,5 @@
+cooldown-start: "&eYou are now in combat for &b30&r&e seconds."
+
+cooldown-stop: "&aYou are no longer in combat."
+
+cancel-command-banned: "&cYou cannot use that command while in combat!"

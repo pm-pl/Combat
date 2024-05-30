@@ -15,12 +15,12 @@ use WeakMap;
 class Combat extends PluginBase {
     private static Combat $instance;
 
-    private Config $config;
-
     /**
      * @var WeakMap<Player, Session>
      */
     private WeakMap $sessions;
+
+    private Config $messages;
 
     private int $cooldown;
     private bool $quitKill;
@@ -36,13 +36,16 @@ class Combat extends PluginBase {
         $this->sessions = new WeakMap();
 
         $this->saveDefaultConfig();
-        $this->config = $this->getConfig();
-        $this->cooldown = is_int($cooldown = $this->config->get("cooldown", 600)) ? $cooldown : 600;
-        $this->quitKill = is_bool($quitKill = $this->config->get("quit-kill", true)) ? $quitKill : true;
-        $this->bannedCommands = is_array($commands = $this->config->get("commands", [])) ?
+        $config = $this->getConfig();
+        $this->cooldown = is_int($cooldown = $config->get("cooldown", 600)) ? $cooldown : 600;
+        $this->quitKill = is_bool($quitKill = $config->get("quit-kill", true)) ? $quitKill : true;
+        $this->bannedCommands = is_array($commands = $config->get("commands", [])) ?
             array_filter($commands, function($command): bool {
                 return is_string($command);
             }) : [];
+
+        $this->saveResource("messages.yml");
+        $this->messages = new Config($this->getDataFolder() . "messages.yml", Config::YAML);
 
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function(): void {
             $this->bannedCommands = array_map(function($commands) {
@@ -71,7 +74,7 @@ class Combat extends PluginBase {
     }
 
     public function getMessage(string $message): string {
-        return TextFormat::colorize($this->config->getNested("messages." . $message, $message));
+        return TextFormat::colorize($this->messages->getNested($message, $message));
     }
 
     public function getCooldown(): int {
