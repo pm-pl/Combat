@@ -7,6 +7,7 @@ Combat is an open source [PocketMine-MP](https://pmmp.io/) plugin preventing pla
 
 ## Features
 - Configurable **Cooldown** for combat timer.
+- Optional **ScoreHud** support using the `combat.cooldown` tag.
 - Configurable list of **blocked commands and subcommands** for players who are in combat.
 - Optionally **kill** players who try to log off while in combat.
 
